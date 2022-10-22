@@ -31,9 +31,13 @@ It's possible to launch the playbook `playbook.yml` against the machines made by
 
     -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
 
-Setup the replicas
+Launch the playbook:
 
-    ansible-playbook playbook-replica.yml -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+    ansible-playbook playbook.yml -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+
+To prevent Ansible from checking if the new hosts are among the known_hosts, set the environmental variable `ANSIBLE_HOST_KEY_CHECKING` to `False`:
+
+    export ANSIBLE_HOST_KEY_CHECKING=False
 
 ## Checking installation
 In order to to check if the setup works, stop the redis on the main server:

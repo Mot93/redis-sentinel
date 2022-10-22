@@ -56,6 +56,15 @@
         regexp: '^port'
         line: "port {{ redis_port }}"
         state: present
+    
+    - name: "Redis: ensure that on the replica servers, slaveof is set to redis_main {{ redis_main_ip }} {{ redis_port }}"
+      ansible.builtin.lineinfile:
+        path: /etc/redis.conf
+        regexp: '^slaveof'
+        line: "slaveof {{ redis_main_ip }} {{ redis_port }}"
+        #insertafter: "slaveof {{ redis_main_ip }} {{ redis_port }}"
+        state: present
+      when: inventory_hostname in groups["redis_replica"]
 
     #
     # Config sentinel

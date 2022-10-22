@@ -1,5 +1,14 @@
-# TODO: set vagrant ssh to 0.0.0.0 https://www.vagrantup.com/docs/vagrantfile/ssh_settings
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
+require 'yaml'
+
+cluster = YAML.load_file('cluster.yaml')
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
 Vagrant.configure("2") do |config|
   
   #
@@ -11,11 +20,29 @@ Vagrant.configure("2") do |config|
   SHELL
 
   #
+  # Creating the list of replica servers
+  #
+  leader = ""
+  replicas = Array.new
+  cluster['servers'].each do |server|
+    # Creating the list of replicas
+    if server['is_replica']
+      replicas << server['hostname']
+    else
+      # If it's not a replica, it has to be a leader
+      leader = server['ip']
+    end
+  end
+
+  #
   # Run Ansible from the Vagrant Host ron install redis
   #
   config.vm.provision "ansible" do |ansible|
     ansible.groups = {
-      "redis_replica" => ["redis_replica_1", "redis_replica_2"]
+      "redis_replica" => replicas,
+      "all:vars" => {
+        "redis_main_ip" => leader,
+      }
     }
     ansible.playbook = "playbook.yml"
   end
@@ -30,30 +57,13 @@ Vagrant.configure("2") do |config|
   config.vm.network "public_network", type: "dhcp", bridge: "enp3s0"
 
   #
-  # Main node
+  # Configuring all servers
   #
-  config.vm.define "redis_main", primary: true do |redis_main|
-    redis_main.vm.hostname = "redis4main.local"
-    redis_main.vm.network "private_network", ip: "192.168.56.10"
-    redis_main.vm.network "forwarded_port", guest: 22, host: 4420, protocol: "tcp"
-  end
-
-  #
-  # Replica 1
-  #
-  config.vm.define "redis_replica_1" do |redis_replica_1|
-    redis_replica_1.vm.hostname = "redis4replica1.local"
-    redis_replica_1.vm.network "private_network", ip: "192.168.56.11"
-    redis_replica_1.vm.network "forwarded_port", guest: 22, host: 4421, protocol: "tcp"
-  end
-
-  #
-  # Replica 2
-  #
-  config.vm.define "redis_replica_2" do |redis_replica_2|
-    redis_replica_2.vm.hostname = "redis4replica2.local"
-    redis_replica_2.vm.network "private_network", ip: "192.168.56.12"
-    redis_replica_2.vm.network "forwarded_port", guest: 22, host: 4422, protocol: "tcp"
+  cluster['servers'].each do |server|
+    config.vm.define server["hostname"] do |srv|
+      srv.vm.network "private_network", ip: server["ip"]
+      srv.vm.hostname = server["hostname"]
+    end
   end
 
 end

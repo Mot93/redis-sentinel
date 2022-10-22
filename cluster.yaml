@@ -1,0 +1,15 @@
+---
+redis_port: 6379
+
+servers:
+  - ip: 192.168.56.10
+    hostname: luke
+    is_replica: no
+
+  - ip: 192.168.56.20
+    hostname: han
+    is_replica: yes
+
+  - ip: 192.168.56.30
+    hostname: leia
+    is_replica: yes
