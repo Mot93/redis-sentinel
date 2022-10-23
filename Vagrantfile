@@ -2,7 +2,6 @@
 # vi: set ft=ruby :
 
 require 'yaml'
-
 cluster = YAML.load_file('cluster.yaml')
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -12,7 +11,7 @@ cluster = YAML.load_file('cluster.yaml')
 Vagrant.configure("2") do |config|
   
   #
-  # Upgrading the servers to the latest versions
+  # Upgrading the servers to the latest release
   #
   config.vm.provision "shell", inline: <<-SHELL
     yum upgrade -y
@@ -35,13 +34,14 @@ Vagrant.configure("2") do |config|
   end
 
   #
-  # Run Ansible from the Vagrant Host ron install redis
+  # Run Ansible from the Vagrant host to install and configure both redis and sentinel
   #
   config.vm.provision "ansible" do |ansible|
+    # Creating the group redis_replica ans setting in the inventory the variable redis_leader_ip
     ansible.groups = {
       "redis_replica" => replicas,
       "all:vars" => {
-        "redis_main_ip" => leader,
+        "redis_leader_ip" => leader,
       }
     }
     ansible.playbook = "playbook.yml"
@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
   # config.vm.network "private_network", ip: "dhcp"
   # To bridge the machine onto your network
   # -----> REMEMBER to set the "bridge" field to your desired interface
-  config.vm.network "public_network", type: "dhcp", bridge: "enp3s0"
+  # config.vm.network "public_network", type: "dhcp", bridge: "enp3s0"
 
   #
   # Configuring all servers
