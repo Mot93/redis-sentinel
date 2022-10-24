@@ -29,6 +29,11 @@ In this example I'll show you how to setup 3 machines as Redis server and how to
     `is_replica`: wheter this server is a replica (`yes`) or the leader (`no`).
     There can be only one leader, otherwise the 
 
+3. Have Ansible installed on the host machine.
+    Also, install the Ansible role `redis_sentinel_cluster`:
+
+        ansible-galaxy install git+https://github.com/Mot93/redis_sentinel_cluster.git
+
 ## Creating the VM
 The VM can will be created by [Vagrant](https://www.vagrantup.com/).
 
@@ -43,10 +48,6 @@ Once done, destroy the vms:
 ## Lauching ansible against the vagrant machines
 Once the machines have been created, they have to be provvisioned.
 The tool used by this example to setup the cluster is [Ansible](https://www.redhat.com/en/technologies/management/ansible).
-
-It's also ***necessary to download and install the ansible module*** used in this example:
-
-    ansible-galaxy install git+https://github.com/Mot93/redis_sentinel_cluster.git
 
 ### TIPS:
 
